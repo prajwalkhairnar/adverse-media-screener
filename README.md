@@ -1,7 +1,5 @@
-The following is a detailed `README.md` file for the `adverse-media-screener` project.
 
-````markdown
-# 🛡️ Adverse Media Screener: An LLM-Powered Compliance Engine
+# Adverse Media Screener: An LLM-Powered Compliance Engine
 
 The **Adverse Media Screener** is a robust, AI-powered system designed for financial institutions to automate the Know Your Customer (KYC) and Anti-Money Laundering (AML) compliance screening process. It uses a **LangGraph** state machine to orchestrate multiple Large Language Model (LLM) calls, ensuring high accuracy, traceability, and auditability in classifying news articles related to screened individuals.
 
@@ -9,7 +7,7 @@ This system adheres to strict compliance requirements by utilizing **structured 
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 * **LangGraph Orchestration:** A defined, multi-step workflow handles fetching, extracting, matching, sentiment analysis, and reporting, providing clear logic flow and easy maintenance.
 * **Compliance-First Output:** All LLM outputs are validated against **Pydantic schemas** (`src/models/outputs.py`) for reliable, machine-readable, and auditable results (Section 3.2).
@@ -19,7 +17,7 @@ This system adheres to strict compliance requirements by utilizing **structured 
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 The system is built around a **LangGraph** state machine, which is governed by a central `ScreeningState` Pydantic model. The workflow is split into five distinct nodes:
 
@@ -35,7 +33,7 @@ The system is built around a **LangGraph** state machine, which is governed by a
 
 ---
 
-## ⚙️ Installation and Setup
+## Installation and Setup
 
 ### Prerequisites
 
@@ -45,7 +43,7 @@ The system is built around a **LangGraph** state machine, which is governed by a
 ### 1. Clone the repository
 
 ```bash
-git clone [https://github.com/your-repo/adverse-media-screener.git](https://github.com/your-repo/adverse-media-screener.git)
+git clone https://github.com/prajwalkhairnar/adverse-media-screener.git
 cd adverse-media-screener
 ````
 
@@ -100,7 +98,7 @@ LOG_LEVEL=info # debug, info, warning, error
 
 -----
 
-## ▶️ Usage
+## Usage
 
 The primary entry point is `src/main.py`, which is designed to be run via a simple CLI (using the `click` library).
 
@@ -136,7 +134,7 @@ The final structured report will be printed to the console (and optionally saved
 
 -----
 
-## 🧪 Testing
+## Testing
 
 The test suite ensures that all deterministic logic and LLM orchestration flow correctly by **mocking all external dependencies** (network calls and LLM responses).
 
@@ -150,7 +148,7 @@ This will execute tests for the `ArticleFetcher`, `EntityExtractionNode`, and a 
 
 -----
 
-## 📜 Compliance and Audit
+## Compliance and Audit
 
 All compliance requirements are met via structured outputs:
 
@@ -160,5 +158,4 @@ All compliance requirements are met via structured outputs:
 
 For a detailed breakdown of the expected final report structure, see: [REPORT.md](https://www.google.com/search?q=docs/REPORT.md).
 
-```
-```
+
