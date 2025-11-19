@@ -32,17 +32,22 @@ class ArticleFetcher:
 
     def _get_article_text(self, url: str) -> tuple[Optional[str], Optional[dict]]:
         """Fetch content and extract text/metadata dict using trafilatura."""
+        
+        # FIX: Use requests.get directly to pass custom headers, 
+        # then pass the HTML content to trafilatura.extract()
         try:
-            # trafilatura handles the underlying request
-            downloaded = trafilatura.fetch_url(url, headers=self.headers)
+            # 1. Fetch content using requests with custom headers
+            response = requests.get(url, headers=self.headers, timeout=15)
+            response.raise_for_status() # Raise exception for 4xx or 5xx status codes
             
-            if downloaded is None:
-                 # This can indicate network failure, block, or content too sparse
-                 raise requests.exceptions.RequestException("Failed to download or parse article URL content.")
+            downloaded_html = response.text
             
-            # Extract main text and metadata as a dictionary
+            if not downloaded_html:
+                 raise requests.exceptions.RequestException("Received empty content.")
+            
+            # 2. Extract main text and metadata as a dictionary from the content
             extracted_data = trafilatura.extract(
-                downloaded,
+                downloaded_html, # Pass the HTML string
                 output_format="json", 
                 include_links=False,
                 include_comments=False,
@@ -58,9 +63,9 @@ class ArticleFetcher:
             return text_content, extracted_data
 
         except requests.exceptions.HTTPError as e:
+            # (Error handling logic remains the same)
             if e.response.status_code == 404:
                 logger.error(f"Article not found (404) at {url}")
-                # Handle 404 as per spec (Section 2.2.1: Handle common errors)
                 raise ValueError("Article URL returned 404 Not Found.") from e
             elif e.response.status_code in [401, 403]:
                 logger.warning(f"Access denied (paywall/403) at {url}")
@@ -77,7 +82,6 @@ class ArticleFetcher:
         except Exception as e:
             logger.error(f"Unexpected error during article fetching: {e}")
             raise RuntimeError(f"Unexpected error during fetching: {e}") from e
-
 
     def _detect_language(self, text: str) -> str:
         """Detect language of the text content using langdetect."""

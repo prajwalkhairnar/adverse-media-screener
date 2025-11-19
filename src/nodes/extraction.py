@@ -3,7 +3,8 @@ import json
 
 from langchain_core.language_models import BaseLanguageModel
 # Import chain creation function and required output model
-from src.chains.entity_extraction import create_entity_extraction_chain, ExtractionOutput
+from src.chains.entity_extraction import create_entity_extraction_chain
+from src.models.schemas import ExtractionOutput
 from langchain_core.output_parsers import JsonOutputParser # Still needed for instructions
 
 from src.graph.state import ScreeningState

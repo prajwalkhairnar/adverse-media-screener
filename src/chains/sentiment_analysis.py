@@ -3,10 +3,10 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
 from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.pydantic_v1 import BaseModel
+from pydantic import BaseModel
 
 from config.prompts import SENTIMENT_ANALYSIS_SYSTEM_PROMPT, SENTIMENT_ANALYSIS_USER_PROMPT
-from src.nodes.sentiment import SentimentOutput # Reuse the output Pydantic model
+from src.models.schemas import SentimentOutput
 
 def create_sentiment_analysis_chain(llm: BaseLanguageModel) -> Runnable:
     """

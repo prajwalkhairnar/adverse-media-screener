@@ -3,10 +3,10 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
 from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.pydantic_v1 import BaseModel
+from pydantic import BaseModel
 
 from config.prompts import NAME_MATCHING_SYSTEM_PROMPT, NAME_MATCHING_USER_PROMPT
-from src.nodes.matching import NameMatchingOutput # Reuse the output Pydantic model
+from src.models.schemas import NameMatchingOutput
 
 def create_name_matching_chain(llm: BaseLanguageModel) -> Runnable:
     """

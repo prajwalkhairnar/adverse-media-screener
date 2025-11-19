@@ -1,5 +1,6 @@
 from typing import Literal, Any, Dict, List
 from functools import partial
+from datetime import datetime # Added missing import
 
 from langgraph.graph import StateGraph, END
 from langchain_core.language_models import BaseLanguageModel
@@ -49,7 +50,7 @@ class AdverseMediaWorkflow:
         article_fetcher = ArticleFetcher()
         try:
             # Note: ArticleFetcher includes its own retry logic.
-            metadata = article_fetcher.fetch_article_data(query.url)
+            metadata = article_fetcher.fetch_and_parse(query.url)
             
             return {
                 "article_metadata": metadata,
@@ -71,9 +72,9 @@ class AdverseMediaWorkflow:
         """Creates a partial function for LLM-based nodes."""
         
         # Determine the primary LLM provider/model from the current state/settings
-        primary_provider = self.settings.get_provider_enum(
-            self.settings.default_llm_provider
-        )
+        # FIX: Changed the line below to directly use the enum attribute, 
+        # removing the unnecessary and non-existent 'get_provider_enum' method call.
+        primary_provider = self.settings.default_llm_provider
         
         llm = self.llm_factory.get_llm(primary_provider)
 
@@ -88,26 +89,19 @@ class AdverseMediaWorkflow:
         # This is the LangGraph standard signature for nodes
         return partial(node_instance.run, llm_provider=primary_provider)
 
-    # Node instances for LLM-based steps
-    extract_entities_node = partial(
-        _get_llm_chain_node, 
-        NodeClass=EntityExtractionNode
-    )
-    
-    match_person_node = partial(
-        _get_llm_chain_node, 
-        NodeClass=NameMatchingNode
-    )
-    
-    analyze_sentiment_node = partial(
-        _get_llm_chain_node, 
-        NodeClass=SentimentAnalysisNode
-    )
+    # --- FIX: Changed assignments to instance methods to ensure 'self' is bound ---
 
-    generate_report_node = partial(
-        _get_llm_chain_node, 
-        NodeClass=ReportGenerationNode
-    )
+    def extract_entities_node(self) -> partial:
+        return self._get_llm_chain_node(NodeClass=EntityExtractionNode)
+    
+    def match_person_node(self) -> partial:
+        return self._get_llm_chain_node(NodeClass=NameMatchingNode)
+    
+    def analyze_sentiment_node(self) -> partial:
+        return self._get_llm_chain_node(NodeClass=SentimentAnalysisNode)
+
+    def generate_report_node(self) -> partial:
+        return self._get_llm_chain_node(NodeClass=ReportGenerationNode)
 
 
     # =========================================================================

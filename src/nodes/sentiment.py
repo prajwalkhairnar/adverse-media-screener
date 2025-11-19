@@ -2,7 +2,8 @@ from typing import Dict, Any, List
 
 from langchain_core.language_models import BaseLanguageModel
 # Import chain creation function and required output model
-from src.chains.sentiment_analysis import create_sentiment_analysis_chain, SentimentOutput
+from src.chains.sentiment_analysis import create_sentiment_analysis_chain
+from src.models.schemas import SentimentOutput
 from langchain_core.output_parsers import JsonOutputParser # Still needed for instructions
 
 from src.graph.state import ScreeningState

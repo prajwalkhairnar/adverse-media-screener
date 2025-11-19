@@ -3,11 +3,12 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable
 from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.pydantic_v1 import BaseModel
+from pydantic import BaseModel
+
 
 from config.prompts import ENTITY_EXTRACTION_SYSTEM_PROMPT, ENTITY_EXTRACTION_USER_PROMPT
 from src.nodes.base import BaseNode # Import for the _bind_structured_output utility
-from src.nodes.extraction import ExtractionOutput # Reuse the output Pydantic model
+from src.models.schemas import ExtractionOutput
 
 def create_entity_extraction_chain(llm: BaseLanguageModel) -> Runnable:
     """

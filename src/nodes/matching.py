@@ -3,8 +3,9 @@ from datetime import date
 
 from langchain_core.language_models import BaseLanguageModel
 # Import chain creation function and required output model
-from src.chains.name_matching import create_name_matching_chain, NameMatchingOutput
-from langchain_core.output_parsers import JsonOutputParser # Still needed for instructions
+from src.chains.name_matching import create_name_matching_chain
+from src.models.schemas import NameMatchingOutput
+from langchain_core.output_parsers import JsonOutputParser 
 
 from src.graph.state import ScreeningState
 from src.nodes.base import BaseNode

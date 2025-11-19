@@ -43,6 +43,7 @@ langgraph-prebuilt==1.0.4
 langgraph-sdk==0.2.9
 langsmith==0.4.43
 lxml==6.0.2
+lxml_html_clean==0.4.3
 markdown-it-py==4.0.0
 marshmallow==3.26.1
 mdurl==0.1.2

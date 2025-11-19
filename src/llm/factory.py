@@ -7,7 +7,7 @@ Responsible for creating and configuring LangChain LLM clients
 (OpenAI, Anthropic, Groq) based on application settings.
 """
 
-from typing import Union
+from typing import Union, Optional
 from functools import lru_cache
 
 from langchain_core.language_models import BaseLanguageModel

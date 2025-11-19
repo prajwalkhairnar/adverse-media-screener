@@ -4,7 +4,7 @@ import time
 
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.runnables import Runnable
-from langchain_core.pydantic_v1 import BaseModel
+from pydantic import BaseModel
 
 from src.llm.cost_tracker import CostTracker
 from src.graph.state import ScreeningState
