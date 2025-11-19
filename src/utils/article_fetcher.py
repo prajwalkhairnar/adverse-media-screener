@@ -8,6 +8,7 @@ text and metadata using trafilatura and langdetect. (Section 2.2.1)
 """
 
 import requests
+import json
 import trafilatura
 from langdetect import detect, LangDetectException
 from datetime import date, datetime
@@ -46,17 +47,22 @@ class ArticleFetcher:
                  raise requests.exceptions.RequestException("Received empty content.")
             
             # 2. Extract main text and metadata as a dictionary from the content
-            extracted_data = trafilatura.extract(
+            extracted_json_str = trafilatura.extract(
                 downloaded_html, # Pass the HTML string
                 output_format="json", 
                 include_links=False,
                 include_comments=False,
-                json_as_dict=True
             )
             
+            if not extracted_json_str:
+                logger.warning(f"Trafilatura failed to extract any content from {url}")
+                return None, None
+
+            extracted_data = json.loads(extracted_json_str) # <<< New parsing step
+            
             if not extracted_data or not extracted_data.get('text'):
-                logger.warning(f"Trafilatura failed to extract clean text from {url}")
-                return None, None 
+                logger.warning(f"Trafilatura output was empty or missing text from {url}")
+                return None, None
 
             text_content = extracted_data.get('text')
             
