@@ -13,7 +13,7 @@ ENTITY_EXTRACTION_SYSTEM_PROMPT = """You are an expert at extracting information
 
 Your task is to identify ALL people mentioned in articles and extract their identifying details with high precision."""
 
-ENTITY_EXTRACTION_USER_PROMPT = """<task>
+ENTITY_EXTRACTION_USER_PROMPT = f"""<task>
 Extract all people mentioned in the following news article. For each person, identify any available details that could help verify their identity.
 </task>
 
@@ -40,17 +40,23 @@ Extract all people mentioned in the following news article. For each person, ide
 </instructions>
 
 <output_format>
-Return a JSON array of person objects. Each object should have:
+Return a JSON object matching the ExtractionOutput schema.
+The object must contain a key 'extracted_entities', which holds the list of person objects.
 {{
-  "full_name": "exact name as in article",
-  "age": numeric age if mentioned (or null),
-  "approximate_age_range": "description like 'in his 40s'" (or null),
-  "occupation": "job title or role" (or null),
-  "location": "city, country, or region" (or null),
-  "other_details": ["any other identifying info"],
-  "context_snippet": "1-2 sentences showing how person is described",
-  "confidence": "high/medium/low" based on clarity of information
+  "extracted_entities": [
+    {{
+      "full_name": "exact name as in article",
+      "age": numeric age if mentioned (or null),
+      "approximate_age_range": "description like 'in his 40s'" (or null),
+      "occupation": "job title or role" (or null),
+      "location": "city, country, or region" (or null),
+      "other_details": ["any other identifying info"],
+      "context_snippet": "1-2 sentences showing how person is described",
+      "confidence": "high/medium/low" based on clarity of information
+    }}
+  ]
 }}
+
 </output_format>
 
 <important>
@@ -58,7 +64,12 @@ Return a JSON array of person objects. Each object should have:
 - If uncertain about details, include them with lower confidence
 - Preserve original spelling and capitalization
 - Include nicknames if mentioned (e.g., "Jim (James) Smith")
-</important>"""
+</important>
+
+<critical>
+When generating the final JSON output, ensure all string values (especially names and snippets) do not contain unnecessary escape characters (like backslashes before apostrophes: \\'). Output the cleanest possible JSON.
+</critical>
+"""
 
 
 # =============================================================================

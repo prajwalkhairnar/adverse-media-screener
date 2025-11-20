@@ -35,8 +35,15 @@ def create_entity_extraction_chain(llm: BaseLanguageModel) -> Runnable:
     # Since BaseNode is an abstract class, we'll use a simplified utility chain construction.
     
     # Simple chain construction:
+    
+    # return (
+    #     prompt
+    #     | llm.with_structured_output(ExtractionOutput) # Use native structured output
+    #     | output_parser
+    # ).with_config(tags=["extraction_chain"])
+
     return (
         prompt
-        | llm.with_structured_output(ExtractionOutput) # Use native structured output
-        | output_parser
+        | llm # <--- Pass prompt to LLM, it returns the raw JSON string based on prompt instructions
+        | output_parser # <--- Use the parser to convert the JSON string into the Pydantic object
     ).with_config(tags=["extraction_chain"])

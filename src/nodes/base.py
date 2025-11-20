@@ -66,7 +66,7 @@ class BaseNode(ABC):
         output_length = len(str(response).split()) # Simple word count
         
         # Track the usage (simulated/estimated)
-        self.cost_tracker.track_usage(
+        self.cost_tracker.record_usage(
             step_name=step_name,
             provider=llm_provider,
             model_name=llm_model,

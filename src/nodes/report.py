@@ -40,9 +40,13 @@ class ReportGenerationNode(BaseNode):
         """
         logger.info("Running Report Generation Node...")
         
+
+
         # 1. Check if the core decision (MATCH, NO_MATCH, UNCERTAIN) has been made
+        final_decision = state.get("match_decision")
+
         # The decision is required to generate a coherent report
-        if not state.get("final_decision"):
+        if not final_decision:
             error_msg = "Cannot generate report: Final decision is missing from state."
             logger.error(error_msg)
             return {
@@ -51,17 +55,21 @@ class ReportGenerationNode(BaseNode):
             }
 
         # 2. Prepare the input variables for the report prompt
-        # The report prompt typically takes the original query, all assessments, and metadata.
-        prompt_vars = {
-            "query_info": json.dumps(state["query"].model_dump()), # Original input
-            "article_metadata": json.dumps(state["article_metadata"].model_dump()), # Article info
-            "entities": json.dumps([e.model_dump() for e in state["entities"]]), # All extracted entities
-            "match_assessment": json.dumps(state["match_assessment"].model_dump()), # Final match assessment
-            "sentiment_assessment": json.dumps(state["sentiment_assessment"].model_dump()) 
+        report_data = {
+            "query_info": state["query"].model_dump(),
+            "article_metadata": state["article_metadata"].model_dump(),
+            "entities": [e.model_dump() for e in state["entities"]],
+            "match_assessment": state["match_assessment"].model_dump(),
+            "sentiment_assessment": state["sentiment_assessment"].model_dump() 
                                     if state["sentiment_assessment"] else "None (No match detected)",
-            "final_decision": state["final_decision"],
-            "all_errors": state["errors"], # Include any errors/warnings in the report summary
+            "final_decision": final_decision,
+            "all_errors": state["errors"],
             "all_warnings": state["warnings"],
+        }
+        
+        # The prompt only expects the 'results_json' variable.
+        prompt_vars = {
+            "results_json": json.dumps(report_data, indent=2), # Dump as clean JSON string
         }
 
         # 3. Execute the chain
@@ -78,7 +86,7 @@ class ReportGenerationNode(BaseNode):
             # This is the final structured output from the entire system.
             final_result = ScreeningResult(
                 query=state["query"].model_dump(),
-                decision=state["final_decision"],
+                decision=final_decision,
                 match_assessment=state["match_assessment"],
                 sentiment_assessment=state["sentiment_assessment"],
                 article_metadata=state["article_metadata"],

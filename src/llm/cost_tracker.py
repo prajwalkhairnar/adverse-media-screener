@@ -10,6 +10,7 @@ cost of LLM operations based on provider pricing.
 from typing import Dict, Any, Optional
 from config.settings import LLMProvider
 
+from datetime import datetime, timezone
 
 # NOTE: Pricing data (Section 4.4) is hardcoded here. In a production system,
 # this should ideally be fetched from a configuration service or an updated source,
@@ -118,7 +119,7 @@ class CostTracker:
         # Store detailed call log for the audit trail (Section 8.2)
         self.llm_calls.append(
             {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "step": step_name,
                 "provider": provider.value,
                 "model": model_name,
