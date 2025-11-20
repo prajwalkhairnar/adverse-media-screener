@@ -29,6 +29,6 @@ def create_name_matching_chain(llm: BaseLanguageModel) -> Runnable:
 
     return (
         prompt
-        | llm.with_structured_output(NameMatchingOutput)
+        | llm #.with_structured_output(NameMatchingOutput)
         | output_parser
     ).with_config(tags=["name_matching_chain"])

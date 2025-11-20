@@ -18,13 +18,13 @@ Extract all people mentioned in the following news article. For each person, ide
 </task>
 
 <article>
-<url>{article_url}</url>
-<title>{article_title}</title>
-<source>{article_source}</source>
-<publish_date>{publish_date}</publish_date>
-<language>{language}</language>
+<url>{{article_url}}</url>
+<title>{{article_title}}</title>
+<source>{{article_source}}</source>
+<publish_date>{{publish_date}}</publish_date>
+<language>{{language}}</language>
 <content>
-{article_content}
+{{article_content}}
 </content>
 </article>
 
@@ -41,21 +41,22 @@ Extract all people mentioned in the following news article. For each person, ide
 
 <output_format>
 Return a JSON object matching the ExtractionOutput schema.
-The object must contain a key 'extracted_entities', which holds the list of person objects.
-{{
-  "extracted_entities": [
-    {{
-      "full_name": "exact name as in article",
-      "age": numeric age if mentioned (or null),
-      "approximate_age_range": "description like 'in his 40s'" (or null),
-      "occupation": "job title or role" (or null),
-      "location": "city, country, or region" (or null),
-      "other_details": ["any other identifying info"],
-      "context_snippet": "1-2 sentences showing how person is described",
-      "confidence": "high/medium/low" based on clarity of information
-    }}
-  ]
-}}
+The object must contain a key 'extracted_entities', which holds the list of person objects:
+
+<extracted_entities>
+  <person>
+    <full_name>exact name as in article</full_name>
+    <age type="numeric">numeric age if mentioned (or null)</age>
+    <approximate_age_range>description like 'in his 40s' (or null)</approximate_age_range>
+    <occupation>job title or role (or null)</occupation>
+    <location>city, country, or region (or null)</location>
+    <other_details>
+      <detail>any other identifying info</detail>
+    </other_details>
+    <context_snippet>1-2 sentences showing how person is described</context_snippet>
+    <confidence>high/medium/low based on clarity of information</confidence>
+  </person>
+</extracted_entities>
 
 </output_format>
 
@@ -93,7 +94,7 @@ Determine if the query person and the article entity refer to the same individua
 </query_person>
 
 <article_entity>
-{entity_json}
+{entity_xml}
 </article_entity>
 
 <article_context>
@@ -135,28 +136,33 @@ Determine if the query person and the article entity refer to the same individua
 </matching_considerations>
 
 <output_format>
-Return a JSON object with:
-{{
-  "is_match": true or false (true if confident match OR uncertain),
-  "confidence": "HIGH" / "MEDIUM" / "LOW",
-  "match_probability": 0.0 to 1.0 (numeric confidence score),
-  "reasoning_steps": [
-    "Step 1: Compare names...",
-    "Step 2: Verify age...",
-    "Step 3: Check other identifiers..."
-  ],
-  "supporting_evidence": [
-    "Name matches with common nickname variation",
-    "Age aligns with DOB (45 years old in 2024, DOB 1978)"
-  ],
-  "contradicting_evidence": [
-    "Article mentions location X, query person from location Y"
-  ],
-  "missing_information": [
-    "middle_name",
-    "exact_dob_in_article"
-  ]
-}}
+
+Return a single JSON object that strictly adheres to the schema provided in the format instructions. The output structure must contain a single top-level key: "final_assessment":
+
+Return a JSON object that strictly adheres to the NameMatchingOutput schema.
+The object must a single top-level key: "final_assessment", which holds the rest:
+
+<final_assessment>
+  <is_match>true or false</is_match>
+  <confidence>HIGH/MEDIUM/LOW</confidence>
+  <match_probability>0.0 to 1.0 (numeric confidence score)</match_probability>
+  <reasoning_steps>
+    <step>Step 1: Compare names...</step>
+    <step>Step 2: Verify age...</step>
+  </reasoning_steps>
+  <supporting_evidence>
+    <evidence>Name matches with common nickname variation</evidence>
+    <evidence>Age aligns with DOB (45 years old in 2024, DOB 1978)</evidence>
+  </supporting_evidence>
+  <contradicting_evidence>
+    <evidence>Article mentions location X, query person from location Y</evidence>
+  </contradicting_evidence>
+  <missing_information>
+    <item>middle_name</item>
+    <item>exact_dob_in_article</item>
+  </missing_information>
+</final_assessment>
+
 </output_format>
 
 <decision_guidelines>
@@ -191,12 +197,7 @@ Analyze whether this news article portrays the specified individual in a negativ
 </person_of_interest>
 
 <article>
-<title>{article_title}</title>
-<source>{article_source}</source>
-<publish_date>{publish_date}</publish_date>
-<content>
-{article_content}
-</content>
+{article_text}
 </article>
 
 <adverse_media_indicators>
@@ -391,25 +392,28 @@ def format_entity_for_prompt(entity: dict) -> str:
         XML-formatted entity string
     """
     xml = "<entity>\n"
-    xml += f"  <full_name>{entity.get('full_name', 'Unknown')}</full_name>\n"
+    xml += f"  <full_name>{entity.full_name}</full_name>\n"
 
-    if entity.get('age'):
-        xml += f"  <age>{entity['age']}</age>\n"
-    if entity.get('approximate_age_range'):
-        xml += f"  <approximate_age_range>{entity['approximate_age_range']}</approximate_age_range>\n"
-    if entity.get('occupation'):
-        xml += f"  <occupation>{entity['occupation']}</occupation>\n"
-    if entity.get('location'):
-        xml += f"  <location>{entity['location']}</location>\n"
+    if entity.age is not None:
+        xml += f"  <age>{entity.age}</age>\n"
+    if entity.approximate_age_range: # Pydantic treats empty string/list as falsey
+        xml += f"  <approximate_age_range>{entity.approximate_age_range}</approximate_age_range>\n"
+    if entity.occupation:
+        xml += f"  <occupation>{entity.occupation}</occupation>\n"
+    if entity.location:
+        xml += f"  <location>{entity.location}</location>\n"
 
-    if entity.get('other_details'):
+    if entity.other_details:
         xml += "  <other_details>\n"
-        for detail in entity['other_details']:
+        # FIX 3: Iterate directly over the Pydantic list field
+        for detail in entity.other_details:
             xml += f"    <detail>{detail}</detail>\n"
         xml += "  </other_details>\n"
 
-    if entity.get('context_snippet'):
-        xml += f"  <context_snippet>{entity['context_snippet']}</context_snippet>\n"
+    # context_snippet is a required string field
+    if entity.context_snippet:
+        xml += f"  <context_snippet>{entity.context_snippet}</context_snippet>\n"
 
     xml += "</entity>"
+
     return xml

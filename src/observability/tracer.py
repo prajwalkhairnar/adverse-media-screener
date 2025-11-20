@@ -22,11 +22,11 @@ def setup_tracing_environment():
     
     if settings.langsmith_api_key and settings.langsmith_project:
         logger.info(
-            f"✅ LangSmith tracing is configured for project: {settings.langsmith_project}"
+            f"LangSmith tracing is configured for project: {settings.langsmith_project}"
         )
         # Note: The LangChain runtime must also be set with LANGCHAIN_TRACING_V2=true
     else:
         logger.warning(
-            "⚠️ LangSmith tracing is **disabled**. Set LANGCHAIN_API_KEY and "
+            "LangSmith tracing is **disabled**. Set LANGCHAIN_API_KEY and "
             "LANGCHAIN_PROJECT in your .env file to enable tracing/observability (Section 4.2)."
         )

@@ -138,11 +138,11 @@ class CostTracker:
         suitable for the ProcessingMetadata model.
         """
         return {
-            "total_tokens": self.total_tokens,
-            "prompt_tokens": self.prompt_tokens,
-            "completion_tokens": self.completion_tokens,
-            "cache_read_tokens": self.cache_read_tokens,
-            "cache_write_tokens": self.cache_write_tokens,
+            "total_tokens": int(self.total_tokens), 
+            "prompt_tokens": int(self.prompt_tokens),
+            "completion_tokens": int(self.completion_tokens),
+            "cache_read_tokens": int(self.cache_read_tokens), 
+            "cache_write_tokens": int(self.cache_write_tokens),
             "estimated_cost_usd": self.total_cost_usd,
             # Note: llm_provider/model/duration must be filled in the main workflow
             # which has the final execution context.

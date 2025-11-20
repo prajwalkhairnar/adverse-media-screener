@@ -48,7 +48,6 @@ class NameMatchingNode(BaseNode):
         article_metadata = state["article_metadata"]
         
         # Parse required dates
-        # ... (date parsing logic)
         query_dob = parse_date(query.dob)
         article_date = article_metadata.publish_date or date.today()
 
@@ -60,7 +59,7 @@ class NameMatchingNode(BaseNode):
         for entity in entities:
             # 1. Run deterministic rule-based pre-check: Age Verification (Section 6.2)
             age_check = verify_age_alignment(
-                query.dob, article_date, entity.age
+                query_dob, article_date, entity.age
             )
 
             # 2. Prepare input variables for the LLM prompt (Section 5.2)
@@ -70,21 +69,24 @@ class NameMatchingNode(BaseNode):
                 "article_date": article_date.isoformat(),
                 "article_source": article_metadata.source,
                 "age_check_result": age_check,
-                "entity_xml": format_entity_for_prompt(entity.dict()),
+                "entity_xml": format_entity_for_prompt(entity),
                 "context_snippet": entity.context_snippet,
                 "format_instructions": self.output_parser.get_format_instructions(),
             }
 
             # 3. Execute the chain for this entity
             try:
-                output: NameMatchingOutput = self._invoke_chain_with_tracking(
+                output = self._invoke_chain_with_tracking(
                     self.chain,
                     prompt_vars,
                     step_name=f"match_entity_{entity.full_name[:15]}",
                     llm_provider=llm_provider,
                     llm_model=state["llm_model"],
                 )
-                assessment = output.match_assessment
+
+                parsed_output = NameMatchingOutput.model_validate(output)
+
+                assessment = parsed_output.final_assessment
                 assessment.matched_entity = entity # Attach the entity to the assessment
 
                 # 4. Update Best Match
@@ -148,7 +150,7 @@ class NameMatchingNode(BaseNode):
                 "match_assessment": best_assessment,
                 "match_decision": decision,
                 "steps_completed": state.get("steps_completed", []) + ["match_person"],
-                "llm_calls": state.get("llm_calls", []) + self.cost_tracker.get_latest_calls(),
+                "llm_calls": state.get("llm_calls", []) + self.cost_tracker.llm_calls,
             }
         
         # Default case if loop finishes but no best assessment was set (e.g., all failed)

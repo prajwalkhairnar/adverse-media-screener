@@ -8,8 +8,9 @@ from typing import Dict, Any, List
 import json
 
 from langchain_core.language_models import BaseLanguageModel
-from langchain_core.output_parsers import JsonOutputParser # Still needed for instructions
+from langchain_core.output_parsers import JsonOutputParser
 from pydantic import ValidationError
+from datetime import datetime, timezone
 
 from src.graph.state import ScreeningState
 from src.nodes.base import BaseNode
@@ -83,24 +84,37 @@ class ReportGenerationNode(BaseNode):
             )
 
             # 4. Construct the final ScreeningResult model (Section 3.3)
-            # This is the final structured output from the entire system.
+            # 4a. Compile the complete processing_metadata dictionary
+            cost_metadata = self.cost_tracker.get_metadata()
+            
+            processing_metadata = {
+                # Workflow Status & Audit
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "total_duration_ms": state.get("total_duration_ms", 0), # Assumed to be added by workflow
+                "steps_completed": state.get("steps_completed", []) + ["report_generation"],
+                "errors_encountered": state.get("errors", []),
+                "warnings": state.get("warnings", []),
+                "llm_calls": state.get("llm_calls", []), # Audit trail from all nodes
+                
+                # Global/Config Info
+                "llm_provider": llm_provider.value,
+                "llm_model": state.get("llm_model", "Unknown"),
+                
+                # Token/Cost data (merging in from the CostTracker)
+                **cost_metadata,
+            }
+
             final_result = ScreeningResult(
-                query=state["query"].model_dump(),
+                query=state["query"],
                 decision=final_decision,
                 match_assessment=state["match_assessment"],
                 sentiment_assessment=state["sentiment_assessment"],
                 article_metadata=state["article_metadata"],
                 entities_found=state["entities"],
-                processing_metadata=self.cost_tracker.get_metadata(
-                    llm_provider=llm_provider,
-                    llm_model=state["llm_model"],
-                    total_duration_ms=state.get("total_duration_ms", 0),
-                    steps_completed=state.get("steps_completed", []),
-                    errors_encountered=state["errors"],
-                    warnings=state["warnings"],
-                ),
+                processing_metadata=processing_metadata,
                 report=report_text,
             )
+            
             
             logger.info("Final Compliance Report generated successfully.")
 

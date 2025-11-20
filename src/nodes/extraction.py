@@ -75,8 +75,11 @@ class EntityExtractionNode(BaseNode):
                 llm_model=state["llm_model"],
             )
 
+            parsed_output = ExtractionOutput.model_validate(output)
+
             # The output is an ExtractionOutput Pydantic model instance
-            entities = output.extracted_entities
+            entities = parsed_output.extracted_entities
+            
             
             logger.info(f"Successfully extracted {len(entities)} person entities.")
 
