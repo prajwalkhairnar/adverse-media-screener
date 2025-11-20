@@ -6,6 +6,7 @@ from src.models.outputs import (
     PersonEntity,
     MatchAssessment,
     SentimentAssessment,
+    ScreeningResult,
 )
 from src.models.inputs import ScreeningQuery
 
@@ -56,7 +57,9 @@ class ScreeningState(TypedDict):
     # ------------------------------------
     # 7. Report
     # ------------------------------------
-    final_report: Optional[str]
+    # final_report: Optional[str] # <--- DELETED THIS REDUNDANT KEY
+    final_screening_result: Optional[ScreeningResult] # <--- ADDED THE SUCCESS KEY
+    report_complete: Optional[bool] # <--- ADDED KEY RETURNED BY ReportNode
     
     # ------------------------------------
     # 8. Metadata / Observability
@@ -64,6 +67,9 @@ class ScreeningState(TypedDict):
     errors: List[str]
     warnings: List[str]
     start_time: datetime
+    total_duration_ms: Optional[float] # <--- ADDED THIS KEY
+    steps_completed: List[str] # <--- ADDED KEY (Fixes KeyError on access)
+
     llm_calls: List[dict] # Detailed log of all LLM usage (from CostTracker)
     
     # Runtime context (used internally for nodes)

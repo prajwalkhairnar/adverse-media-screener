@@ -233,4 +233,11 @@ class AdverseMediaWorkflow:
             recursion_limit=10 
         )
         
+        # Calculate duration
+        end_time = datetime.utcnow()
+        duration = end_time - final_state["start_time"]
+        
+        # Update the state with the final duration (required for ProcessingMetadata)
+        final_state["total_duration_ms"] = duration.total_seconds() * 1000.0
+        
         return final_state

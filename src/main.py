@@ -31,6 +31,7 @@ console = Console()
 
 def print_summary_table(result: ScreeningResult):
     """Prints a summary table of the screening results."""
+    # This line is fine, as 'bold' is opened and closed correctly.
     console.rule(f"[bold]{result.decision} Screening Summary[/bold]", style="bold magenta")
 
     table = Table(
@@ -42,18 +43,25 @@ def print_summary_table(result: ScreeningResult):
     table.add_column("Metric", style="dim")
     table.add_column("Value")
 
-    # Core Decision
-    table.add_row("Screening Decision", f"[bold {('red' if result.decision != 'NO_MATCH' else 'green')}]"
-                                        f"{result.decision}[/bold]", end_section=True)
+    # Core Decision - FIX APPLIED HERE
+    decision_color = 'red' if result.decision != 'NO_MATCH' else 'green'
+    # Use f"[{decision_color} bold]" to apply both style and color, and use [/] to close
+    table.add_row(
+        "Screening Decision", 
+        f"[{decision_color} bold]{result.decision}[/]", 
+        end_section=True
+    )
 
     # Match Details
     table.add_row("Match Confidence", f"{result.match_assessment.confidence} ({result.match_assessment.match_probability:.2f})")
     
-    # Sentiment Details (only if present)
+    # Sentiment Details (only if present) - FIX APPLIED HERE
     if result.sentiment_assessment:
         color = "red" if result.sentiment_assessment.is_adverse_media else "green"
-        table.add_row("Adverse Media Found", f"[{color} bold]{result.sentiment_assessment.classification} "
-                                            f"(Severity: {result.sentiment_assessment.severity})[/]")
+        # Combine color and bold inside the tag: [color bold]...[/]
+        table.add_row("Adverse Media Found", 
+                      f"[{color} bold]{result.sentiment_assessment.classification} "
+                      f"(Severity: {result.sentiment_assessment.severity})[/]")
     else:
         table.add_row("Adverse Media Found", "N/A (No match found)")
 
@@ -66,7 +74,6 @@ def print_summary_table(result: ScreeningResult):
     table.add_row("Errors/Warnings", f"[red]{len(meta.errors_encountered)}[/red] Errors, [yellow]{len(meta.warnings)}[/yellow] Warnings")
 
     console.print(table)
-
 
 def print_full_report(report_text: str):
     """Prints the final human-readable report."""
@@ -145,6 +152,9 @@ def screen(name: str, dob: str, url: str, provider: str, model: str):
 
     # 4. Final Output Processing
     console.print("\n" + "="*80)
+
+    console.print(f"[bold yellow]DEBUG:[/bold yellow] Final State Keys: {list(final_state.keys())}")
+    breakpoint()
     
     if "final_screening_result" in final_state:
         result: ScreeningResult = final_state["final_screening_result"]
@@ -156,8 +166,8 @@ def screen(name: str, dob: str, url: str, provider: str, model: str):
         print_full_report(result.report)
         
         # Optional: Save raw structured output for audit
-        # with open(f"report_{datetime.now().strftime('%Y%m%d%H%M%S')}.json", "w") as f:
-        #     json.dump(result.model_dump(), f, indent=2, default=str)
+        with open(f"src/outputs/report_{datetime.now().strftime('%Y%m%d%H%M%S')}.json", "w") as f:
+            json.dump(result.model_dump(), f, indent=2, default=str)
         
     else:
         # Handle case where report generation failed completely
