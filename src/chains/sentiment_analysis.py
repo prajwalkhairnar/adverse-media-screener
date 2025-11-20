@@ -29,6 +29,6 @@ def create_sentiment_analysis_chain(llm: BaseLanguageModel) -> Runnable:
 
     return (
         prompt
-        | llm.with_structured_output(SentimentOutput)
+        | llm
         | output_parser
     ).with_config(tags=["sentiment_analysis_chain"])

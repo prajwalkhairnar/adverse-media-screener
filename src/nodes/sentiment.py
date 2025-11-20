@@ -61,15 +61,22 @@ class SentimentAnalysisNode(BaseNode):
 
         # Execute the chain
         try:
-            output: SentimentOutput = self._invoke_chain_with_tracking(
+            output = self._invoke_chain_with_tracking(
                 self.chain,
                 prompt_vars,
                 step_name="sentiment_analysis",
                 llm_provider=llm_provider,
                 llm_model=state["llm_model"],
             )
-            
-            assessment = output.sentiment_assessment
+
+            parsed_output = SentimentOutput.model_validate(output)
+
+            print("-------------DEBUG-------------------------")
+            print("output type: " + str(type(output)))
+            print("Parsed output type, manual model validate: " + str(type(parsed_output)))
+            print("-------------DEBUG-------------------------")
+
+            assessment = parsed_output.assessment
             
             logger.info(
                 f"Sentiment Result: {assessment.classification}, Adverse: {assessment.is_adverse_media}, Severity: {assessment.severity}"
@@ -78,7 +85,7 @@ class SentimentAnalysisNode(BaseNode):
             return {
                 "sentiment_assessment": assessment,
                 "steps_completed": state.get("steps_completed", []) + ["analyze_sentiment"],
-                "llm_calls": state.get("llm_calls", []) + self.cost_tracker.get_latest_calls(),
+                "llm_calls": state.get("llm_calls", []) + self.cost_tracker.llm_calls,
             }
 
         except Exception as e:

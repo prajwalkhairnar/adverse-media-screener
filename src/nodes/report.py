@@ -105,7 +105,7 @@ class ReportGenerationNode(BaseNode):
             }
 
             final_result = ScreeningResult(
-                query=state["query"],
+                query=state["query"].model_dump(),
                 decision=final_decision,
                 match_assessment=state["match_assessment"],
                 sentiment_assessment=state["sentiment_assessment"],

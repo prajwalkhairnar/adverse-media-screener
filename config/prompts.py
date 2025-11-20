@@ -137,8 +137,6 @@ Determine if the query person and the article entity refer to the same individua
 
 <output_format>
 
-Return a single JSON object that strictly adheres to the schema provided in the format instructions. The output structure must contain a single top-level key: "final_assessment":
-
 Return a JSON object that strictly adheres to the NameMatchingOutput schema.
 The object must a single top-level key: "final_assessment", which holds the rest:
 
@@ -246,21 +244,27 @@ Assess whether the article contains negative information in these categories:
 </important_distinctions>
 
 <output_format>
-Return a JSON object with:
-{{
-  "classification": "POSITIVE" / "NEGATIVE" / "NEUTRAL",
-  "is_adverse_media": true or false,
-  "severity": "HIGH" / "MEDIUM" / "LOW" (if adverse, otherwise null),
-  "adverse_indicators": ["fraud", "lawsuit", "investigation"],
-  "evidence_snippets": [
-    "Quote or paraphrase from article showing adverse info",
-    "Another relevant quote"
-  ],
-  "positive_indicators": ["charges_dropped", "acquitted"] (if any),
-  "context": "Brief explanation of the overall portrayal",
-  "reasoning": "Clear explanation of classification decision"
-}}
+
+Return a JSON object that strictly adheres to the SentimentOutput schema.
+The object must a single top-level key: "assessment", which holds the rest:
+
+<assessment>
+  <classification>NEGATIVE</classification>
+  <is_adverse_media>true</is_adverse_media>
+  <severity>HIGH</severity>
+  <adverse_indicators>
+    <indicator>securities fraud</indicator>
+    <indicator>hate speech</indicator>
+  </adverse_indicators>
+  <evidence_snippets>
+    <snippet>"Musk had not secured the necessary financial backing..."</snippet>
+    <snippet>"Antisemitic and racist tweets spiked..."</snippet>
+  </evidence_snippets>
+  <reasoning>This article details...</reasoning>
+</assessment>
+
 </output_format>
+
 
 <severity_guidelines>
 - HIGH: Criminal convictions, major fraud, sanctions, active money laundering
@@ -270,7 +274,8 @@ Return a JSON object with:
 
 <critical>
 Focus on facts presented in the article. Consider both the nature of the allegations/actions AND their current status (active, resolved, alleged, proven).
-</critical>"""
+</critical>
+"""
 
 
 # =============================================================================
