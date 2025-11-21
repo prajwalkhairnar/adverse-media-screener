@@ -130,7 +130,7 @@ The script will log the step-by-step execution path:
 [INFO] [ReportNode] Report generation complete. Finalizing state.
 ```
 
-The final structured report will be printed to the console (and optionally saved).
+The final structured report will be printed to the console. Additionally, for every run, the report and raw JSON are saved in the `src/outputs` folder.
 
 -----
 
@@ -146,7 +146,7 @@ Run the script from your project root:
 ```
 python run_e2e.py
 ```
-Upon completion, the pipeline will log the step-by-step progress for each test case directly to the console. You will also find the full human-readable (.txt) and structured audit (.json) reports saved in your project root for each executed scenario.
+Upon completion, the pipeline will log the step-by-step progress for each test case directly to the console. You will also find the full human-readable (.md) and structured audit (.json) reports saved in the `src/outputs` folder for each executed scenario.
 
 ### 2. Modifying or Adding Test Cases
 The test cases are defined directly within the `run_e2e.py` script in a dictionary list named `TEST_CASES`. To add a new E2E scenario, simply append a new dictionary to this list:
@@ -180,3 +180,7 @@ All compliance requirements are met via structured outputs:
   * **Final Report Schema:** The final output is an instance of the `ScreeningResult` Pydantic model, guaranteeing all required fields are present (Section 3.3).
   * **Audit Trail:** The `ProcessingMetadata` and detailed `llm_calls` logs ensure a complete record of every step and resource consumed.
   * **Report Template:** The structure of the final human-readable report is defined in the LLM prompt (`config/prompts.py`) to ensure all compliance points (decision, evidence, reasoning) are covered.
+
+## Scientific Report
+
+For a detailed analysis of the methodology, test strategy, and performance metrics, please refer to the [Scientific Report](docs/SCIENTIFIC_REPORT.md).
