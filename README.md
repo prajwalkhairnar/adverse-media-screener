@@ -134,17 +134,42 @@ The final structured report will be printed to the console (and optionally saved
 
 -----
 
-## Testing
 
-The test suite ensures that all deterministic logic and LLM orchestration flow correctly by **mocking all external dependencies** (network calls and LLM responses).
+## Running Full End-to-End Test Suites (E2E)
 
-Run tests from the project root:
+While unit tests rely on mocks for speed, a dedicated E2E test suite validates the entire pipeline against live external services (Article Fetcher and LLM APIs), ensuring real-world accuracy and stability.
 
-```bash
-pytest
+The project includes the `run_e2e.py` script in the root directory to automate the execution of multiple real-world adverse media scenarios. This script executes your main CLI program for a defined list of cases.
+
+### 1. Execution
+Run the script from your project root:
+```
+python run_e2e.py
+```
+Upon completion, the pipeline will log the step-by-step progress for each test case directly to the console. You will also find the full human-readable (.txt) and structured audit (.json) reports saved in your project root for each executed scenario.
+
+### 2. Modifying or Adding Test Cases
+The test cases are defined directly within the `run_e2e.py` script in a dictionary list named `TEST_CASES`. To add a new E2E scenario, simply append a new dictionary to this list:
+
+```
+# The central list of scenarios for E2E testing
+TEST_CASES = [
+    # Case 1: Adverse Match (High-Risk Fraud)
+    {"name": "Elizabeth Holmes", "dob": "1984-02-03", "url": "https://www.cnbc.com/2022/11/18/elizabeth-holmes-sentenced-to-more-than-11-years-in-prison.html"},
+    
+    # Case 2: Neutral/Non-Adverse Match
+    {"name": "Tim Cook", "dob": "1960-11-01", "url": "https://www.apple.com/leadership/tim-cook.html"},
+    
+    # Case 3: Adverse Media, but Client Not Found (Testing Match Failure)
+    {"name": "Jane Doe", "dob": "1990-09-12", "url": "https://www.cnn.com/2023/11/02/us/sam-bankman-fried-trial-verdict/index.html"},
+    
+    # --- ADD NEW CASES HERE ---
+    {"name": "New Client Name", "dob": "YYYY-MM-DD", "url": "https://new-live-article.com/adverse-event"},
+]
 ```
 
-This will execute tests for the `ArticleFetcher`, `EntityExtractionNode`, and a full `test_integration.py` workflow run using the mock data in `tests/test_cases.json`.
+The script uses the `subprocess.run()` function to execute the main CLI command for each item in this list, making it easy to add, remove, or modify scenarios[web:2].
+
 
 -----
 
