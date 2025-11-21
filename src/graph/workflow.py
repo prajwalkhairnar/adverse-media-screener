@@ -1,6 +1,6 @@
 from typing import Literal, Any, Dict, List
 from functools import partial
-from datetime import datetime # Added missing import
+from datetime import datetime
 
 from langgraph.graph import StateGraph, END
 from langchain_core.language_models import BaseLanguageModel
@@ -49,7 +49,7 @@ class AdverseMediaWorkflow:
         query: ScreeningQuery = state["query"]
         article_fetcher = ArticleFetcher()
         try:
-            # Note: ArticleFetcher includes its own retry logic.
+
             metadata = article_fetcher.fetch_and_parse(query.url)
             
             return {
@@ -72,8 +72,6 @@ class AdverseMediaWorkflow:
         """Creates a partial function for LLM-based nodes."""
         
         # Determine the primary LLM provider/model from the current state/settings
-        # FIX: Changed the line below to directly use the enum attribute, 
-        # removing the unnecessary and non-existent 'get_provider_enum' method call.
         primary_provider = self.settings.default_llm_provider
         
         llm = self.llm_factory.get_llm(primary_provider)
@@ -89,7 +87,6 @@ class AdverseMediaWorkflow:
         # This is the LangGraph standard signature for nodes
         return partial(node_instance.run, llm_provider=primary_provider)
 
-    # --- FIX: Changed assignments to instance methods to ensure 'self' is bound ---
 
     def extract_entities_node(self) -> partial:
         return self._get_llm_chain_node(NodeClass=EntityExtractionNode)
@@ -127,9 +124,7 @@ class AdverseMediaWorkflow:
             logger.error(f"Invalid match decision in state: {decision}. Proceeding to report.")
             return "report"
 
-    # NOTE: The Part 2 feature 'enrich_data' node and routing logic 
-    # (match_person -> enrich_data -> match_person) are omitted for the MVP 
-    # but the state has reserved fields for it.
+
 
     # =========================================================================
     # Graph Builder
@@ -156,7 +151,7 @@ class AdverseMediaWorkflow:
         # 3. Add Conditional Edge from Matching Node
         workflow.add_conditional_edges(
             "match_person",
-            self.route_match_decision, # Route logic (Section 7.3)
+            self.route_match_decision,
             {
                 "sentiment": "analyze_sentiment",
                 "report": "generate_report",
@@ -228,8 +223,6 @@ class AdverseMediaWorkflow:
         final_state: ScreeningState = self.graph.invoke(
             initial_state, 
             config=config,
-            # Max steps ensures we don't run into an infinite loop (e.g., in a future enrichment loop)
-            # Here it's 5 nodes maximum, set higher for safety.
             recursion_limit=10 
         )
         

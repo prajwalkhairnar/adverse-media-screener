@@ -16,7 +16,7 @@ from src.graph.state import ScreeningState
 from src.nodes.base import BaseNode
 from src.utils.logger import get_logger
 from config.settings import LLMProvider
-from src.models.outputs import ScreeningResult # Final output model
+from src.models.outputs import ScreeningResult
 from src.chains.report_generation import create_report_generation_chain
 
 
@@ -70,7 +70,7 @@ class ReportGenerationNode(BaseNode):
         
         # The prompt only expects the 'results_json' variable.
         prompt_vars = {
-            "results_json": json.dumps(report_data, indent=2), # Dump as clean JSON string
+            "results_json": json.dumps(report_data, indent=2),
         }
 
         # 3. Execute the chain
@@ -83,24 +83,24 @@ class ReportGenerationNode(BaseNode):
                 llm_model=state["llm_model"],
             )
 
-            # 4. Construct the final ScreeningResult model (Section 3.3)
+            # 4. Construct the final ScreeningResult model
             # 4a. Compile the complete processing_metadata dictionary
             cost_metadata = self.cost_tracker.get_metadata()
             
             processing_metadata = {
                 # Workflow Status & Audit
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "total_duration_ms": state.get("total_duration_ms", 0), # Assumed to be added by workflow
+                "total_duration_ms": state.get("total_duration_ms", 0),
                 "steps_completed": state.get("steps_completed", []) + ["report_generation"],
                 "errors_encountered": state.get("errors", []),
                 "warnings": state.get("warnings", []),
-                "llm_calls": state.get("llm_calls", []), # Audit trail from all nodes
+                "llm_calls": state.get("llm_calls", []),
                 
                 # Global/Config Info
                 "llm_provider": llm_provider.value,
                 "llm_model": state.get("llm_model", "Unknown"),
                 
-                # Token/Cost data (merging in from the CostTracker)
+                # Token/Cost data
                 **cost_metadata,
             }
 

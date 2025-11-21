@@ -8,7 +8,7 @@ This file is used to break circular dependencies between nodes and chains.
 from pydantic import BaseModel, Field
 from typing import List
 
-# Import the PersonEntity model from the existing outputs package
+
 from src.models.outputs import PersonEntity, MatchAssessment, SentimentAssessment
 
 

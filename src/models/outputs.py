@@ -47,8 +47,7 @@ class PersonEntity(BaseModel):
     context_snippet: str = Field(
         description="1-2 sentences surrounding the mention for context."
     )
-    # NOTE: mention_positions from spec (list[int]) is omitted here for simplicity
-    # but could be added for advanced auditing if required.
+
     other_details: Optional[list[str]] = Field(
         default=None, description="A list of relevant factual snippets (strings) related to this person found in the article. DO NOT wrap these in objects."
     )
@@ -139,9 +138,7 @@ class ProcessingMetadata(BaseModel):
 class ScreeningResult(BaseModel):
     """Complete, final screening result (Section 3.3)."""
 
-    # NOTE: ScreeningQuery (the input model) will be imported and used here,
-    # but for simplicity, we use dict structure to avoid circular import dependency with inputs.py
-    # and just assume a dict or similar structure is passed here from the state.
+    # ScreeningQuery (the input model) will be imported and used here
     query: dict = Field(description="The original ScreeningQuery used for the run.")
     
     decision: Literal["MATCH", "NO_MATCH", "UNCERTAIN"] = Field(

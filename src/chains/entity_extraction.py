@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 
 from config.prompts import ENTITY_EXTRACTION_SYSTEM_PROMPT, ENTITY_EXTRACTION_USER_PROMPT
-from src.nodes.base import BaseNode # Import for the _bind_structured_output utility
+from src.nodes.base import BaseNode
 from src.models.schemas import ExtractionOutput
 
 def create_entity_extraction_chain(llm: BaseLanguageModel) -> Runnable:
@@ -29,21 +29,8 @@ def create_entity_extraction_chain(llm: BaseLanguageModel) -> Runnable:
         ]
     ).partial(format_instructions=output_parser.get_format_instructions())
 
-    # Utilize the utility method from the BaseNode structure to handle provider-specific binding
-    # NOTE: This requires temporary instantiation or moving the utility to a common place.
-    # For now, we assume a static helper or a similar approach is used.
-    # Since BaseNode is an abstract class, we'll use a simplified utility chain construction.
-    
-    # Simple chain construction:
-    
-    # return (
-    #     prompt
-    #     | llm.with_structured_output(ExtractionOutput) # Use native structured output
-    #     | output_parser
-    # ).with_config(tags=["extraction_chain"])
-
     return (
         prompt
-        | llm # <--- Pass prompt to LLM, it returns the raw JSON string based on prompt instructions
-        | output_parser # <--- Use the parser to convert the JSON string into the Pydantic object
+        | llm
+        | output_parser
     ).with_config(tags=["extraction_chain"])

@@ -15,8 +15,7 @@ from datetime import date, datetime
 from typing import Optional, Any
 
 from src.models.outputs import ArticleMetadata
-from src.utils.logger import get_logger # Requires logger.py to be implemented
-# from config.settings import get_settings # Used for headers/proxies/timeouts if needed
+from src.utils.logger import get_logger
 
 logger = get_logger("ArticleFetcher")
 
@@ -28,18 +27,16 @@ class ArticleFetcher:
 
     def __init__(self):
         """Initialize with standard headers for requests."""
-        # Using a standard, non-malicious-looking User-Agent is good practice.
         self.headers = {'User-Agent': 'AdverseMediaScreener-Bot/1.0 (Contact: analyst@example.com)'}
 
     def _get_article_text(self, url: str) -> tuple[Optional[str], Optional[dict]]:
         """Fetch content and extract text/metadata dict using trafilatura."""
         
-        # FIX: Use requests.get directly to pass custom headers, 
-        # then pass the HTML content to trafilatura.extract()
+
         try:
             # 1. Fetch content using requests with custom headers
             response = requests.get(url, headers=self.headers, timeout=15)
-            response.raise_for_status() # Raise exception for 4xx or 5xx status codes
+            response.raise_for_status()
             
             downloaded_html = response.text
             
@@ -48,7 +45,7 @@ class ArticleFetcher:
             
             # 2. Extract main text and metadata as a dictionary from the content
             extracted_json_str = trafilatura.extract(
-                downloaded_html, # Pass the HTML string
+                downloaded_html,
                 output_format="json", 
                 include_links=False,
                 include_comments=False,
@@ -58,7 +55,7 @@ class ArticleFetcher:
                 logger.warning(f"Trafilatura failed to extract any content from {url}")
                 return None, None
 
-            extracted_data = json.loads(extracted_json_str) # <<< New parsing step
+            extracted_data = json.loads(extracted_json_str)
             
             if not extracted_data or not extracted_data.get('text'):
                 logger.warning(f"Trafilatura output was empty or missing text from {url}")
@@ -69,7 +66,7 @@ class ArticleFetcher:
             return text_content, extracted_data
 
         except requests.exceptions.HTTPError as e:
-            # (Error handling logic remains the same)
+
             if e.response.status_code == 404:
                 logger.error(f"Article not found (404) at {url}")
                 raise ValueError("Article URL returned 404 Not Found.") from e
@@ -121,7 +118,6 @@ class ArticleFetcher:
         date_str = metadata_dict.get('date') if metadata_dict else None
         if date_str:
             try:
-                # Convert ISO format date string to date object
                 publish_date = datetime.fromisoformat(date_str.split('T')[0]).date()
             except ValueError:
                 logger.warning(f"Could not parse date string: {date_str}. Ignoring date.")

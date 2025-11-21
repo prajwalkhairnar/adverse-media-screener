@@ -57,15 +57,9 @@ def configure_logging():
         # Add stack info for debugging/audit
         StackInfoRenderer(),
 
-        # # Replace Callsites specifying needed params
-        # CallsiteParameterAdder(parameters=[
-        #     CallsiteParameter.PATHNAME,
-        #     CallsiteParameter.LINENO,
-        #     CallsiteParameter.FUNC_NAME,
-        # ]),
+
 
         EventRenamer("message"),
-        # Key sorting is useful for stable log format
         key_stripper(keys=['_record', '_from_structlog']),
         dict_tracebacks,
     ]
@@ -73,17 +67,15 @@ def configure_logging():
     # 2. Console/Development Processors
     if is_development:
         processors = shared_processors + [
-            # Prepare logs for terminal color formatting
             structlog.dev.ConsoleRenderer(colors=True, sort_keys=True)
         ]
     # 3. Production/Audit Processors (JSON)
     else:
         processors = shared_processors + [
-            # Render the final log dict as JSON for machine readability (Section 8.2)
             structlog.processors.JSONRenderer(sort_keys=True)
         ]
 
-    # Configure Python's standard logging (needed for LangChain/Requests integration)
+    # Configure Python's standard logging
     logging.basicConfig(
         format="%(message)s",
         stream=sys.stdout,

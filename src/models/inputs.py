@@ -10,9 +10,7 @@ for adverse media screening.
 from typing import Optional
 from pydantic import BaseModel, Field
 
-# NOTE: LLMProvider is defined in config/settings.py but used here for type
-# hinting. For execution, it should be imported from the config module.
-# from config import LLMProvider
+
 from enum import Enum
 class LLMProvider(str, Enum):
     """Supported LLM providers."""
@@ -44,6 +42,5 @@ class ScreeningQuery(BaseModel):
 
     class Config:
         """Pydantic configuration."""
-        # Allow use of Enum from another module (LLMProvider)
         use_enum_values = True
         extra = "forbid"

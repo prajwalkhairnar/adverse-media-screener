@@ -36,7 +36,7 @@ class LLMFactory:
             model=model_name,
             temperature=self.settings.llm_temperature,
             api_key=self.settings.openai_api_key,
-            # Structured output is handled by LangChain/Pydantic outside the client init
+
         )
 
     def _get_anthropic_client(self, model_name: str) -> ChatAnthropic:
@@ -47,10 +47,6 @@ class LLMFactory:
             api_key=self.settings.anthropic_api_key,
         )
 
-        # NOTE: Prompt caching feature from spec (Section 4.3) requires configuration
-        # which is handled via the API client/header settings.
-        # LangChain's Anthropic integration may abstract this, but we ensure it's
-        # using the correct API key/settings which the environment provides.
         return client
 
     def _get_groq_client(self, model_name: str) -> ChatGroq:

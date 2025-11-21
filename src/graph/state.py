@@ -57,9 +57,8 @@ class ScreeningState(TypedDict):
     # ------------------------------------
     # 7. Report
     # ------------------------------------
-    # final_report: Optional[str] # <--- DELETED THIS REDUNDANT KEY
-    final_screening_result: Optional[ScreeningResult] # <--- ADDED THE SUCCESS KEY
-    report_complete: Optional[bool] # <--- ADDED KEY RETURNED BY ReportNode
+    final_screening_result: Optional[ScreeningResult]
+    report_complete: Optional[bool]
     
     # ------------------------------------
     # 8. Metadata / Observability
@@ -67,8 +66,8 @@ class ScreeningState(TypedDict):
     errors: List[str]
     warnings: List[str]
     start_time: datetime
-    total_duration_ms: Optional[float] # <--- ADDED THIS KEY
-    steps_completed: List[str] # <--- ADDED KEY (Fixes KeyError on access)
+    total_duration_ms: Optional[float]
+    steps_completed: List[str]
 
     llm_calls: List[dict] # Detailed log of all LLM usage (from CostTracker)
     
@@ -76,7 +75,3 @@ class ScreeningState(TypedDict):
     llm_provider: Optional[str]
     llm_model: Optional[str]
     
-    # NOTE: The actual CostTracker object is too complex for LangGraph's 
-    # default state serialization. We track its data in `llm_calls` and 
-    # pass the object reference separately if needed, but for simplicity
-    # and purity of the TypedDict, we'll keep only the serializable data here.

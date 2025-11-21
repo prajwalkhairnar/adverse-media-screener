@@ -1,7 +1,6 @@
 from typing import Dict, Any, List
 
 from langchain_core.language_models import BaseLanguageModel
-# Import chain creation function and required output model
 from src.chains.sentiment_analysis import create_sentiment_analysis_chain
 from src.models.schemas import SentimentOutput
 from langchain_core.output_parsers import JsonOutputParser # Still needed for instructions
@@ -29,7 +28,6 @@ class SentimentAnalysisNode(BaseNode):
         # 💡 Chain is now initialized from the external src/chains package
         self.chain = create_sentiment_analysis_chain(llm)
 
-    # NOTE: The _build_chain method is REMOVED.
 
     def run(self, state: ScreeningState, llm_provider: LLMProvider) -> Dict[str, Any]:
         """
@@ -52,7 +50,7 @@ class SentimentAnalysisNode(BaseNode):
         matched_entity: PersonEntity = match_assessment.matched_entity
         person_name = matched_entity.full_name
 
-        # Prepare input variables for the prompt (Section 5.3)
+        # Prepare input variables for the prompt
         prompt_vars = {
             "article_text": article_text,
             "person_name": person_name,
@@ -84,7 +82,7 @@ class SentimentAnalysisNode(BaseNode):
             }
 
         except Exception as e:
-            # ... (Error handling logic is unchanged)
+
             error_msg = f"Sentiment analysis failed: {e.__class__.__name__}: {e}"
             logger.error(error_msg, exc_info=True)
             return {

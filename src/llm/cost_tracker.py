@@ -12,21 +12,18 @@ from config.settings import LLMProvider
 
 from datetime import datetime, timezone
 
-# NOTE: Pricing data (Section 4.4) is hardcoded here. In a production system,
-# this should ideally be fetched from a configuration service or an updated source,
-# but hardcoding it simplifies the current implementation based on the spec.
 # Prices are in USD per 1 Million (M) tokens.
 LLM_PRICING_USD_PER_M = {
-    # Groq (Llama 3.3 70B - assuming latest pricing, example rates from spec)
+    # Groq
     (LLMProvider.GROQ, "input"): 0.59,
     (LLMProvider.GROQ, "output"): 0.59,
-    # OpenAI (gpt-4o-2024-11-20 - assumed production model)
+    # OpenAI
     (LLMProvider.OPENAI, "input"): 5.00,  # Example cost
     (LLMProvider.OPENAI, "output"): 15.00,  # Example cost
-    # Anthropic (claude-sonnet-4 - assumed production model)
+    # Anthropic
     (LLMProvider.ANTHROPIC, "input"): 3.00,
     (LLMProvider.ANTHROPIC, "output"): 15.00,  # Example cost
-    # Anthropic Caching (Section 4.3)
+    # Anthropic Caching
     (LLMProvider.ANTHROPIC, "cache_read"): 0.30,
     (LLMProvider.ANTHROPIC, "cache_write"): 3.75,
 }
@@ -58,7 +55,6 @@ class CostTracker:
         """
         Calculate the estimated cost for a single LLM interaction.
         """
-        # All prices are per 1,000,000 tokens. Convert token counts to M tokens.
         M_TOKENS = 1_000_000
 
         # Standard token costs
@@ -69,7 +65,7 @@ class CostTracker:
             (provider, "output"), 0
         )
 
-        # Anthropic Caching costs (Section 4.3)
+        # Anthropic Caching costs
         cache_read_cost = (
             (cache_read_tokens / M_TOKENS)
             * LLM_PRICING_USD_PER_M.get((provider, "cache_read"), 0)
@@ -116,7 +112,7 @@ class CostTracker:
         self.total_tokens = self.prompt_tokens + self.completion_tokens
         self.total_cost_usd += cost
 
-        # Store detailed call log for the audit trail (Section 8.2)
+        # Store detailed call log for the audit trail
         self.llm_calls.append(
             {
                 "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -144,6 +140,5 @@ class CostTracker:
             "cache_read_tokens": int(self.cache_read_tokens), 
             "cache_write_tokens": int(self.cache_write_tokens),
             "estimated_cost_usd": self.total_cost_usd,
-            # Note: llm_provider/model/duration must be filled in the main workflow
-            # which has the final execution context.
+
         }

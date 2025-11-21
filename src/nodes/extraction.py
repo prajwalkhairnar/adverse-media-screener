@@ -2,7 +2,6 @@ from typing import Dict, Any, List
 import json
 
 from langchain_core.language_models import BaseLanguageModel
-# Import chain creation function and required output model
 from src.chains.entity_extraction import create_entity_extraction_chain
 from src.models.schemas import ExtractionOutput
 from langchain_core.output_parsers import JsonOutputParser # Still needed for instructions
@@ -28,21 +27,15 @@ class EntityExtractionNode(BaseNode):
         # Initialize the structured output parser (used only for format instructions)
         self.output_parser = JsonOutputParser(pydantic_object=ExtractionOutput)
         
-        # 💡 Chain is now initialized from the external src/chains package
+        # Chain is now initialized from the external src/chains package
         self.chain = create_entity_extraction_chain(llm)
 
-    # NOTE: The _build_chain method is REMOVED.
     
     def run(self, state: ScreeningState, llm_provider: LLMProvider) -> Dict[str, Any]:
         """
         Executes the entity extraction process and updates the state.
         """
         logger.info("Running Entity Extraction Node...")
-        
-        # ... (rest of the run method is unchanged)
-
-        # Snipped for brevity: The rest of the logic prepares prompt_vars, 
-        # executes self._invoke_chain_with_tracking, and updates the state.
         
         article_metadata = state["article_metadata"]
         article_content = state["article_text"]

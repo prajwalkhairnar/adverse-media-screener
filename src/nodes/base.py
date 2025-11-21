@@ -61,11 +61,10 @@ class BaseNode(ABC):
         duration_ms = (time.time() - start_time) * 1000
         
         # Fallback/Simplification: Estimate token counts based on length
-        # In a production system, this would be retrieved from LangChain callbacks.
-        input_length = len(str(input_vars).split()) # Simple word count
-        output_length = len(str(response).split()) # Simple word count
+        input_length = len(str(input_vars).split())
+        output_length = len(str(response).split())
         
-        # Track the usage (simulated/estimated)
+        # Track the usage
         self.cost_tracker.record_usage(
             step_name=step_name,
             provider=llm_provider,

@@ -2,7 +2,6 @@ from typing import Dict, Any, List, Optional
 from datetime import date
 
 from langchain_core.language_models import BaseLanguageModel
-# Import chain creation function and required output model
 from src.chains.name_matching import create_name_matching_chain
 from src.models.schemas import NameMatchingOutput
 from langchain_core.output_parsers import JsonOutputParser 
@@ -29,13 +28,8 @@ class NameMatchingNode(BaseNode):
         super().__init__(llm, settings, cost_tracker)
         self.output_parser = JsonOutputParser(pydantic_object=NameMatchingOutput)
         
-        # 💡 Chain is now initialized from the external src/chains package
+        # Chain is now initialized from the external src/chains package
         self.chain = create_name_matching_chain(llm)
-
-    # NOTE: The _build_chain method is REMOVED.
-
-    # NOTE: The _get_best_match and run methods remain largely unchanged,
-    # as they only call self.chain (which is now correctly initialized).
     
     def _get_best_match(
         self, state: ScreeningState, llm_provider: LLMProvider
@@ -57,12 +51,12 @@ class NameMatchingNode(BaseNode):
         best_assessment: Optional[MatchAssessment] = None
         
         for entity in entities:
-            # 1. Run deterministic rule-based pre-check: Age Verification (Section 6.2)
+            # 1. Run deterministic rule-based pre-check: Age Verification
             age_check = verify_age_alignment(
                 query_dob, article_date, entity.age
             )
 
-            # 2. Prepare input variables for the LLM prompt (Section 5.2)
+            # 2. Prepare input variables for the LLM prompt
             prompt_vars = {
                 "query_name": query.name,
                 "query_dob": query.dob,
@@ -109,11 +103,10 @@ class NameMatchingNode(BaseNode):
         """
         Executes the name matching process and updates the state.
         """
-        # ... (rest of run method is unchanged, uses _get_best_match)
+
         logger.info("Running Name Matching Node...")
         
         if not state.get("entities"):
-            # ... (No entities found logic)
             decision: Literal["MATCH", "NO_MATCH", "UNCERTAIN"] = "NO_MATCH"
             logger.info("Match decision: NO_MATCH (No entities found).")
             
@@ -153,7 +146,7 @@ class NameMatchingNode(BaseNode):
                 "llm_calls": state.get("llm_calls", []) + self.cost_tracker.llm_calls,
             }
         
-        # Default case if loop finishes but no best assessment was set (e.g., all failed)
+        # Default case if loop finishes but no best assessment was set
         logger.error("All matching attempts failed due to errors.")
         return {
             "match_decision": "NO_MATCH",

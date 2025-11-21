@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
-from src.utils.logger import get_logger # Requires logger.py
+from src.utils.logger import get_logger
 
 logger = get_logger("Validators")
 
@@ -32,15 +32,14 @@ def validate_url(url: str) -> bool:
 def parse_date(date_str: Optional[Union[str, date]]) -> Optional[date]:
     """Parses a date string (ISO format) into a date object."""
     if date_str is None:
-        return None  # Return None if the input date is missing
+        return None
     
-    # Handle if it's already a date object (though less likely here)
+    # Handle if it's already a date object
     if isinstance(date_str, date):
         return date_str
         
-    # CRITICAL: Ensure it is a string before calling fromisoformat
+    # Ensure it is a string before calling fromisoformat
     if not isinstance(date_str, str):
-        # Log a warning or raise a more specific error if the type is unexpected
         raise TypeError(f"parse_date received unexpected type: {type(date_str)}. Must be str or None.")
         
     try:

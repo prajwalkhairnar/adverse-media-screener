@@ -180,7 +180,3 @@ All compliance requirements are met via structured outputs:
   * **Final Report Schema:** The final output is an instance of the `ScreeningResult` Pydantic model, guaranteeing all required fields are present (Section 3.3).
   * **Audit Trail:** The `ProcessingMetadata` and detailed `llm_calls` logs ensure a complete record of every step and resource consumed.
   * **Report Template:** The structure of the final human-readable report is defined in the LLM prompt (`config/prompts.py`) to ensure all compliance points (decision, evidence, reasoning) are covered.
-
-For a detailed breakdown of the expected final report structure, see: [REPORT.md](https://www.google.com/search?q=docs/REPORT.md).
-
-

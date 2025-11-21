@@ -423,7 +423,7 @@ def format_entity_for_prompt(entity: dict) -> str:
 
     if entity.age is not None:
         xml += f"  <age>{entity.age}</age>\n"
-    if entity.approximate_age_range: # Pydantic treats empty string/list as falsey
+    if entity.approximate_age_range:
         xml += f"  <approximate_age_range>{entity.approximate_age_range}</approximate_age_range>\n"
     if entity.occupation:
         xml += f"  <occupation>{entity.occupation}</occupation>\n"
@@ -432,12 +432,10 @@ def format_entity_for_prompt(entity: dict) -> str:
 
     if entity.other_details:
         xml += "  <other_details>\n"
-        # FIX 3: Iterate directly over the Pydantic list field
         for detail in entity.other_details:
             xml += f"    <detail>{detail}</detail>\n"
         xml += "  </other_details>\n"
 
-    # context_snippet is a required string field
     if entity.context_snippet:
         xml += f"  <context_snippet>{entity.context_snippet}</context_snippet>\n"
 

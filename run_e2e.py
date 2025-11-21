@@ -28,7 +28,7 @@ TEST_CASES = [
     {
         "name": "Paul Anderson",
         "dob": "1978-01-01",
-        "url": "https://www.bbc.co.uk/news/articles/cjr4z2g5557o",  
+        "url": "https://www.bbc.co.uk/news/articles/cjr4z2g5557o",
         "description": "Match-negative no client mention; article about adverse event, client name not mentioned so no match.",
         "expected_decision": "NO_MATCH"
     }
@@ -60,7 +60,7 @@ def parse_decision(output: str) -> str:
 
 
 def run_test_case(case: dict):
-    # Base command: python -m src.main screen
+
     command_parts = [
         "python", "-m", "src.main", "screen",
         f"--name", case["name"],
@@ -73,9 +73,9 @@ def run_test_case(case: dict):
     # Execute the command
     result = subprocess.run(
         command_parts,
-        capture_output=True,  # Set to True if you want to capture output instead of printing it directly
+        capture_output=True,
         text=True,
-        check=False  # Don't raise error if the script itself fails, handle manually
+        check=False
     )
 
     actual_decision = parse_decision(result.stdout)
@@ -87,13 +87,13 @@ def run_test_case(case: dict):
 
         return {
             "name": case["name"],
-            "expected": case["expected_decision"], # Assuming this field is in your case dict
+            "expected": case["expected_decision"],
             "actual": actual_decision
         }
 
     else:
         print(f"❌ Case {case['name']} FAILED with return code {result.returncode}.")
-        # 💡 Print the error stream to see why the script crashed
+        # Print the error stream to see why the script crashed
         print("\n--- ERROR OUTPUT (stderr) ---")
         print(result.stderr) 
         print("-----------------------------")
@@ -133,14 +133,14 @@ def calculate_metrics(results: list):
 
         if is_actual_positive:
             if is_predicted_positive:
-                # 🥇 True Positive (TP): We flagged a true adverse case for review.
+                # True Positive (TP): We flagged a true adverse case for review.
                 TP += 1
             else:
-                # 🚨 False Negative (FN): We missed a true adverse case (CRITICAL FAILURE).
+                # False Negative (FN): We missed a true adverse case (CRITICAL FAILURE).
                 FN += 1
         else: # Actual is NO_MATCH or UNCERTAIN
             if is_predicted_positive:
-                # ⬆️ False Positive (FP): We flagged a non-adverse case for review (Analyst overhead).
+                # False Positive (FP): We flagged a non-adverse case for review (Analyst overhead).
                 FP += 1
             # else: True Negative (TN) - Actual NO_MATCH predicted NO_MATCH (Discarded correctly)
     
@@ -148,7 +148,7 @@ def calculate_metrics(results: list):
     recall = TP / (TP + FN) if (TP + FN) > 0 else 0.0
     precision = TP / (TP + FP) if (TP + FP) > 0 else 0.0
     
-    # 4. Also calculate the False Negative Rate (FNR), which is 1 - Recall, for the report
+    # 4. Calculate the False Negative Rate (FNR), which is 1 - Recall, for the report
     FNR = FN / (TP + FN) if (TP + FN) > 0 else 0.0
 
     return {

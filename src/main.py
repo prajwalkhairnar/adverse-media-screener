@@ -13,7 +13,6 @@ from rich.console import Console
 from rich.table import Table
 
 # --- Local Imports ---
-# AMENDMENT: Import config.settings as a module since config/ is a sibling to src/.
 import config.settings as settings
 
 from src.utils.logger import get_logger
@@ -31,7 +30,6 @@ console = Console()
 
 def print_summary_table(result: ScreeningResult):
     """Prints a summary table of the screening results."""
-    # This line is fine, as 'bold' is opened and closed correctly.
     console.rule(f"[bold]{result.decision} Screening Summary[/bold]", style="bold magenta")
 
     table = Table(
@@ -43,7 +41,7 @@ def print_summary_table(result: ScreeningResult):
     table.add_column("Metric", style="dim")
     table.add_column("Value")
 
-    # Core Decision - FIX APPLIED HERE
+    # Core Decision
     decision_color = 'red' if result.decision != 'NO_MATCH' else 'green'
     # Use f"[{decision_color} bold]" to apply both style and color, and use [/] to close
     table.add_row(
@@ -55,10 +53,9 @@ def print_summary_table(result: ScreeningResult):
     # Match Details
     table.add_row("Match Confidence", f"{result.match_assessment.confidence} ({result.match_assessment.match_probability:.2f})")
     
-    # Sentiment Details (only if present) - FIX APPLIED HERE
+    # Sentiment Details (only if present)
     if result.sentiment_assessment:
         color = "red" if result.sentiment_assessment.is_adverse_media else "green"
-        # Combine color and bold inside the tag: [color bold]...[/]
         table.add_row("Adverse Media Found", 
                       f"[{color} bold]{result.sentiment_assessment.classification} "
                       f"(Severity: {result.sentiment_assessment.severity})[/]")
@@ -97,7 +94,6 @@ def cli():
 @click.option("--url", required=True, type=str, help="News article URL to be screened.")
 @click.option(
     "--provider",
-    # Use the module alias to access the LLMProvider Enum
     type=click.Choice([p.value for p in settings.LLMProvider]),
     default=None,
     help="Optional override for the default LLM provider.",
@@ -112,7 +108,6 @@ def screen(name: str, dob: str, url: str, provider: str, model: str):
     """
     Executes an adverse media screening against a single news article URL.
     """
-    # Use the module alias to retrieve settings
     settings_instance = settings.get_settings()
 
     # 1. Prepare the input query model
@@ -121,7 +116,6 @@ def screen(name: str, dob: str, url: str, provider: str, model: str):
             name=name,
             dob=dob,
             url=url,
-            # Use the module alias to reference LLMProvider
             provider=settings.LLMProvider(provider) if provider else None,
             model=model,
         )
@@ -173,7 +167,7 @@ def screen(name: str, dob: str, url: str, provider: str, model: str):
             
             console.print(f"\n[bold green]Report Saved:[/bold green] Full report text written to [yellow]{filename}[/yellow]")
 
-            # Optional: Save raw structured output for audit
+            # Save raw structured output for audit
             with open(f"src/outputs/report_{datetime.now().strftime('%Y%m%d%H%M%S')}.json", "w") as f:
                 json.dump(result.model_dump(), f, indent=2, default=str)
             
