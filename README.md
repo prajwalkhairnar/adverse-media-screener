@@ -111,7 +111,7 @@ python src/main.py screen \
     --name "John Smith" \
     --dob "1985-07-25" \
     --url "[https://mock-url.com/news/john-smith-investigation](https://mock-url.com/news/john-smith-investigation)" \
-    --provider "openai"  # Optional: overrides DEFAULT_LLM_PROVIDER
+    --provider "groq"  # Optional: overrides DEFAULT_LLM_PROVIDER
 ```
 
 **Example Output (Console):**
