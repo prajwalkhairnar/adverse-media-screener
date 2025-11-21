@@ -248,7 +248,8 @@ Assess whether the article contains negative information in these categories:
 
 Return a JSON object that strictly adheres to the SentimentOutput schema.
 The object must a single top-level key: "assessment", which holds the rest:
-Should strictly be a valid JSON, see below structure for reference. 
+Should strictly be a valid JSON, see below structure for reference. DO NOT OUTPUT XML, OUTPUT MUST BE JSON ONLY. 
+DO NOT INCLUDE ANY OTHER text or greeting apart from the JSON
 
 <assessment>
   <classification>NEGATIVE</classification>
@@ -267,6 +268,25 @@ Should strictly be a valid JSON, see below structure for reference.
 
 </output_format>
 
+<example>
+{{
+  "assessment": {{
+    "classification": "NEGATIVE",
+    "is_adverse_media": true,
+    "severity": "HIGH",
+    "adverse_indicators": [
+      "securities fraud",
+      "hate speech"
+    ],
+    "evidence_snippets": [
+      "Musk had not secured the necessary financial backing...",
+      "Antisemitic and racist tweets spiked..."
+    ],
+    "reasoning": "This article details significant negative events including financial misconduct and a spike in hateful speech, indicating a high severity of adverse media."
+  }}
+}}
+
+</example>
 
 <severity_guidelines>
 - HIGH: Criminal convictions, major fraud, sanctions, active money laundering

@@ -7,7 +7,7 @@ Contains reusable functions for input validation and core logic
 like age verification for the Name Matching strategy.
 """
 
-from typing import Optional, Literal
+from typing import Optional, Literal, Union
 from urllib.parse import urlparse
 from datetime import date
 from dateutil.relativedelta import relativedelta
@@ -29,16 +29,25 @@ def validate_url(url: str) -> bool:
         return False
 
 
-def parse_date(date_str: str, date_format: str = "%Y-%m-%d") -> Optional[date]:
-    """
-    Safely parses a date string into a date object.
-    """
-    if not date_str:
-        return None
+def parse_date(date_str: Optional[Union[str, date]]) -> Optional[date]:
+    """Parses a date string (ISO format) into a date object."""
+    if date_str is None:
+        return None  # Return None if the input date is missing
+    
+    # Handle if it's already a date object (though less likely here)
+    if isinstance(date_str, date):
+        return date_str
+        
+    # CRITICAL: Ensure it is a string before calling fromisoformat
+    if not isinstance(date_str, str):
+        # Log a warning or raise a more specific error if the type is unexpected
+        raise TypeError(f"parse_date received unexpected type: {type(date_str)}. Must be str or None.")
+        
     try:
         return date.fromisoformat(date_str)
     except ValueError:
-        logger.warning(f"Failed to parse date string: {date_str} (expected {date_format})")
+        # Handle cases where the string format is wrong but the type is correct
+        logger.warning(f"Failed to parse date string: {date_str}. Returning None.")
         return None
 
 
