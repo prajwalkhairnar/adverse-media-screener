@@ -36,19 +36,27 @@ TEST_CASES = [
 
 
 
+# run_e2e.py
+
 def parse_decision(output: str) -> str:
-    # It iterates through the output lines in reverse (starting from the bottom, 
-    # where the final decision is usually printed)
-    for line in reversed(output.splitlines()):
-        # It looks for a unique identifier string
-        if "FINAL_DECISION:" in line:
-            # If found, it splits the string to isolate the actual decision word
-            # Example: "FINAL_DECISION: MATCH" -> ["FINAL_DECISION:", " MATCH"]
-            return line.split("FINAL_DECISION:")[1].strip()
-            
-    # If the decision line is not found (perhaps due to a script crash), 
-    # it returns a default UNKNOWN status.
-    return "UNKNOWN"
+    """
+    Parses the final screening decision from the output summary table.
+    Looks for the line containing 'Screening Decision'
+    """
+    for line in output.splitlines():
+        # Look for the line in the table that contains the decision:
+        # e.g., '│ Screening Decision │ MATCH               │'
+        if 'Screening Decision' in line:
+            # Split the line by the column separator (│), take the third element, and clean it up.
+            parts = line.split('│')
+            if len(parts) >= 3:
+                # The decision is in the third column (index 2 or 3 depending on leading/trailing columns)
+                # Let's target the last non-empty part which contains the decision
+                decision = parts[-2].strip() 
+                # Decision will be 'MATCH', 'NO_MATCH', or 'UNCERTAIN'
+                if decision in ["MATCH", "NO_MATCH", "UNCERTAIN"]:
+                    return decision
+    return "UNKNOWN" # Returns UNKNOWN if the decision row wasn't found
 
 
 def run_test_case(case: dict):
@@ -76,12 +84,21 @@ def run_test_case(case: dict):
         print(f"✅ Case {case['name']} COMPLETED successfully. Decision: {actual_decision}")
         # Print the output that was captured, which includes the report path.
         print(result.stdout) 
+
+        return {
+            "name": case["name"],
+            "expected": case["expected_decision"], # Assuming this field is in your case dict
+            "actual": actual_decision
+        }
+
     else:
         print(f"❌ Case {case['name']} FAILED with return code {result.returncode}.")
         # 💡 Print the error stream to see why the script crashed
         print("\n--- ERROR OUTPUT (stderr) ---")
         print(result.stderr) 
         print("-----------------------------")
+
+        return None
 
 
 def calculate_metrics(results: list):
@@ -101,6 +118,10 @@ def calculate_metrics(results: list):
     FN = 0  # False Negatives: Actual MATCH predicted as NO_MATCH
 
     for res in results:
+
+        if res is None: 
+            continue
+
         expected = res["expected"]
         actual = res["actual"]
         

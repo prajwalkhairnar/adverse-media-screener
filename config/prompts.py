@@ -46,7 +46,7 @@ The object must contain a key 'extracted_entities', which holds the list of pers
 <extracted_entities>
   <person>
     <full_name>exact name as in article</full_name>
-    <age type="numeric">numeric age if mentioned (or null)</age>
+    <age>integer age if mentioned (or null)</age>
     <approximate_age_range>description like 'in his 40s' (or null)</approximate_age_range>
     <occupation>job title or role (or null)</occupation>
     <location>city, country, or region (or null)</location>
