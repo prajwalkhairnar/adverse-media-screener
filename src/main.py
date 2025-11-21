@@ -165,7 +165,7 @@ def screen(name: str, dob: str, url: str, provider: str, model: str):
         try:
             name_safe = result.query['name'].replace(" ", "_").lower()
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"report_{name_safe}_{timestamp}.md"
+            filename = f"src/outputs/report_{name_safe}_{timestamp}.md"
 
             # 2. Write the report text to the file
             with open(filename, "w", encoding="utf-8") as f:
