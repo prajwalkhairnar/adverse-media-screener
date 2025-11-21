@@ -56,13 +56,14 @@ def configure_logging():
         structlog.processors.format_exc_info,
         # Add stack info for debugging/audit
         StackInfoRenderer(),
-        # Replace Callsites with CallsiteParameterAdder specifying needed params
-        CallsiteParameterAdder(parameters=[
-            CallsiteParameter.PATHNAME,
-            CallsiteParameter.LINENO,
-            CallsiteParameter.FUNC_NAME,
-        ]),
-        # Remove structlog's internal event dict key for cleaner output
+
+        # # Replace Callsites specifying needed params
+        # CallsiteParameterAdder(parameters=[
+        #     CallsiteParameter.PATHNAME,
+        #     CallsiteParameter.LINENO,
+        #     CallsiteParameter.FUNC_NAME,
+        # ]),
+
         EventRenamer("message"),
         # Key sorting is useful for stable log format
         key_stripper(keys=['_record', '_from_structlog']),
