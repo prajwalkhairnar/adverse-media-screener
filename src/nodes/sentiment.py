@@ -71,11 +71,6 @@ class SentimentAnalysisNode(BaseNode):
 
             parsed_output = SentimentOutput.model_validate(output)
 
-            print("-------------DEBUG-------------------------")
-            print("output type: " + str(type(output)))
-            print("Parsed output type, manual model validate: " + str(type(parsed_output)))
-            print("-------------DEBUG-------------------------")
-
             assessment = parsed_output.assessment
             
             logger.info(

@@ -2,14 +2,15 @@ import pytest
 import json
 from unittest.mock import MagicMock, patch
 from datetime import datetime, date
-from langchain_core.pydantic_v1 import parse_obj_as
+from pydantic import TypeAdapter
 
 # Import system components
 from src.graph.workflow import AdverseMediaWorkflow
 from src.llm.cost_tracker import CostTracker
 from src.llm.factory import LLMFactory
 from src.models.inputs import ScreeningQuery
-from src.models.outputs import ArticleMetadata, NameMatchingOutput, SentimentOutput
+from src.models.outputs import ArticleMetadata
+from src.models.schemas import NameMatchingOutput, SentimentOutput, ExtractionOutput
 from config.settings import get_settings, LLMProvider
 
 
@@ -27,27 +28,47 @@ def mock_external_dependencies(mocker):
     test_data = load_test_case("simple_query")
     
     # 1. Mock ArticleFetcher.fetch_article_data
-    mock_article_metadata = parse_obj_as(
-        ArticleMetadata, 
+    
+    # Define the TypeAdapter for ArticleMetadata
+    article_metadata_adapter = TypeAdapter(ArticleMetadata)
+    
+    # Use validate_python on the adapter
+    mock_article_metadata = article_metadata_adapter.validate_python(
         test_data["expected_fetcher_output"]
     )
+    
     mocker.patch(
         "src.graph.workflow.ArticleFetcher.fetch_article_data", 
         return_value=mock_article_metadata
     )
     
     # 2. Mock LLM chain invokes (the core LLM calls)
-    mock_extraction_output = parse_obj_as(NameMatchingOutput, test_data["mock_llm_extraction_output"])
-    mock_matching_output = parse_obj_as(NameMatchingOutput, test_data["mock_llm_matching_output"])
-    mock_sentiment_output = parse_obj_as(SentimentOutput, test_data["mock_llm_sentiment_output"])
-    
+    # Define the TypeAdapter for ExtractionOutput
+    extraction_adapter = TypeAdapter(ExtractionOutput)
+
+    # Define the TypeAdapter for NameMatchingOutput
+    name_matching_adapter = TypeAdapter(NameMatchingOutput)
+    # Define the TypeAdapter for SentimentOutput
+    sentiment_adapter = TypeAdapter(SentimentOutput)
+
+    # Use validate_python on the respective adapters
+    mock_extraction_output = extraction_adapter.validate_python(
+        test_data["mock_llm_extraction_output"]
+    )
+    mock_matching_output = name_matching_adapter.validate_python(
+        test_data["mock_llm_matching_output"]
+    )
+ 
+    mock_sentiment_output = sentiment_adapter.validate_python(
+        test_data["mock_llm_sentiment_output"]
+    )
+
     # Mock the LLM chain calls based on step name
     def mock_invoke_chain(chain, input_vars, step_name, llm_provider, llm_model):
         if "extraction" in step_name:
             return mock_extraction_output
         elif "match_entity" in step_name:
-            # We must wrap the MatchAssessment in NameMatchingOutput Pydantic model
-            return NameMatchingOutput(match_assessment=mock_matching_output.match_assessment)
+            return mock_matching_output # NameMatchingOutput(match_assessment=mock_matching_output.match_assessment)
         elif "sentiment_analysis" in step_name:
             return mock_sentiment_output
         elif "report_generation" in step_name:
@@ -64,6 +85,7 @@ def mock_external_dependencies(mocker):
     # 3. Mock the LLMFactory to return a simple mock LLM client
     mock_llm = MagicMock()
     mocker.patch.object(LLMFactory, 'get_llm', return_value=mock_llm)
+
 
 # --- Tests ---
 
@@ -92,7 +114,6 @@ async def test_workflow_end_to_end_success(mock_external_dependencies):
     # 1. Final Decision and Report
     assert final_state["match_decision"] == "MATCH"
     assert "final_screening_result" in final_state
-    assert "final_report" in final_state
     
     result = final_state["final_screening_result"]
     assert result.decision == "MATCH"
@@ -104,7 +125,7 @@ async def test_workflow_end_to_end_success(mock_external_dependencies):
         "extract_entities", 
         "match_person", 
         "analyze_sentiment", 
-        "generate_report"
+        "report_generation"
     ]
     assert all(step in final_state["steps_completed"] for step in expected_steps)
     

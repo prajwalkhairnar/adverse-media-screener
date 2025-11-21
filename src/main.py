@@ -152,9 +152,6 @@ def screen(name: str, dob: str, url: str, provider: str, model: str):
 
     # 4. Final Output Processing
     console.print("\n" + "="*80)
-
-    console.print(f"[bold yellow]DEBUG:[/bold yellow] Final State Keys: {list(final_state.keys())}")
-    breakpoint()
     
     if "final_screening_result" in final_state:
         result: ScreeningResult = final_state["final_screening_result"]
@@ -165,10 +162,24 @@ def screen(name: str, dob: str, url: str, provider: str, model: str):
         # Print final report text
         print_full_report(result.report)
         
-        # Optional: Save raw structured output for audit
-        with open(f"src/outputs/report_{datetime.now().strftime('%Y%m%d%H%M%S')}.json", "w") as f:
-            json.dump(result.model_dump(), f, indent=2, default=str)
-        
+        try:
+            name_safe = result.query['name'].replace(" ", "_").lower()
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"report_{name_safe}_{timestamp}.md"
+
+            # 2. Write the report text to the file
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(result.report)
+            
+            console.print(f"\n[bold green]Report Saved:[/bold green] Full report text written to [yellow]{filename}[/yellow]")
+
+            # Optional: Save raw structured output for audit
+            with open(f"src/outputs/report_{datetime.now().strftime('%Y%m%d%H%M%S')}.json", "w") as f:
+                json.dump(result.model_dump(), f, indent=2, default=str)
+            
+        except Exception as e:
+            console.print(f"[bold red]File Save Error:[/bold red] Could not save report file: {e}")
+
     else:
         # Handle case where report generation failed completely
         console.print("[bold red]Screening Failed.[/bold red]")

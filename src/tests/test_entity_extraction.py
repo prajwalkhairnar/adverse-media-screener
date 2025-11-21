@@ -1,7 +1,11 @@
+from src.models.schemas import ExtractionOutput
+
+
 import pytest
 import json
 from unittest.mock import MagicMock
-from langchain_core.pydantic_v1 import parse_obj_as
+from pydantic import TypeAdapter
+from datetime import date
 
 # Import system components
 from src.nodes.extraction import EntityExtractionNode, ExtractionOutput
@@ -24,8 +28,11 @@ def mock_llm_extraction(mocker):
     test_data = load_test_case("simple_query")
     mock_output_dict = test_data["mock_llm_extraction_output"]
     
-    # Create the Pydantic model instance the LLM is expected to return
-    mock_pydantic_output = parse_obj_as(ExtractionOutput, mock_output_dict)
+    # Create an instance of TypeAdapter for your target model
+    adapter = TypeAdapter(ExtractionOutput)
+
+    # Use the adapter to parse and validate the dictionary
+    mock_pydantic_output = adapter.validate_python(mock_output_dict)
     
     # Mock the LLM chain's invoke method
     mock_chain_invoke = mocker.patch(

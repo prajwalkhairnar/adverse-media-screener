@@ -50,7 +50,7 @@ class PersonEntity(BaseModel):
     # NOTE: mention_positions from spec (list[int]) is omitted here for simplicity
     # but could be added for advanced auditing if required.
     other_details: Optional[list[str]] = Field(
-        default=None, description="Any other identifying details (education, company, etc.)"
+        default=None, description="A list of relevant factual snippets (strings) related to this person found in the article. DO NOT wrap these in objects."
     )
 
 

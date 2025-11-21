@@ -50,8 +50,9 @@ The object must contain a key 'extracted_entities', which holds the list of pers
     <approximate_age_range>description like 'in his 40s' (or null)</approximate_age_range>
     <occupation>job title or role (or null)</occupation>
     <location>city, country, or region (or null)</location>
-    <other_details>
-      <detail>any other identifying info</detail>
+    <other_details type=list of string facts>
+      <fact>factual detail 1 (MUST NOT contain inner tags)</fact>
+      <fact>factual detail 2 (MUST NOT contain inner tags)</fact>
     </other_details>
     <context_snippet>1-2 sentences showing how person is described</context_snippet>
     <confidence>high/medium/low based on clarity of information</confidence>
@@ -243,10 +244,11 @@ Assess whether the article contains negative information in these categories:
 - Historical negative events that were resolved → still NEGATIVE but note resolution
 </important_distinctions>
 
-<output_format>
+<output_format type=JSON>
 
 Return a JSON object that strictly adheres to the SentimentOutput schema.
 The object must a single top-level key: "assessment", which holds the rest:
+Should strictly be a valid JSON, see below structure for reference. 
 
 <assessment>
   <classification>NEGATIVE</classification>
