@@ -187,3 +187,7 @@ def screen(name: str, dob: str, url: str, provider: str, model: str):
 
 if __name__ == "__main__":
     cli()
+
+
+# Sample Command:
+# py -m src.main screen  --name "Chris Smith"  --dob "1990-01-01"  --url "https://www.skysports.com/football/news/11095/13472276/sheffield-wednesday-vs-sheffield-united-why-the-first-steel-city-derby-of-the-season-carries-more-weight-than-usual" 
